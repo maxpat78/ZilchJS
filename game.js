@@ -227,7 +227,7 @@ function nominaPuntiDadi(dadi) {
 		pt = puntiUnoCinque(faccia, dadiPerValore)
 		if (!coppia) {
 			s = "Quaterna di "+faccia
-			if (pt[0]) s += " e coppia di "+pt[0]
+			if (pt[0]) s += " con 1 o 5"
 			return s
 		}
 		if (faccia != 1)
@@ -289,9 +289,11 @@ function tiraDadi() {
 		D6.diceSaved.length = D6.diceSavedLast
 	}
 	if (!D6.inizioTurno) {
-		// Blocca il tiro successivo: 1) se non si accantona almeno un dado...
+		// Blocca il tiro: se abbiamo superato i 10000 punti...
+		if (puntiSalvati>10000) return
+		// ...se non si accantona almeno un dado...
 		if (!D6.diceSelected.length) return
-		// 2) se si accantonano dadi senza valore
+		// ...se si accantonano dadi senza valore
 		if (D6.diceSelected.length != calcolaPuntiDadi(D6.diceSelected)[1]) {
 			document.getElementById("infodiv1").innerHTML = "Seleziona solo i dadi <i>*utili*</i> prima di tirare!"
 			return
@@ -361,8 +363,8 @@ var callback = function (total, info, results) {
 	if (puntiMano+puntiTiro >= 300) {
 		s += "Puoi salvare {0} punti. ".format(puntiMano+puntiTiro)
 		puntoDaAnnotare = true
-		// Tiro libero, se usiamo tutti i dadi utili
-		if (D6.diceSelected.length+punti[1]==6)
+		// Tiro libero, se accantoniamo tutti i dadi utili (risultati validi per il punteggio)
+		if (D6.numDiceShown == punti[1])
 			s+="Puoi rilanciare i dadi, se li salvi tutti."
 	}
 	else
