@@ -1,4 +1,4 @@
-//~ Copyright (C)2011-2019, by maxpat78
+ï»¿//~ Copyright (C)2011-2019, by maxpat78
 //~ Licensed according to Creative Commons CC0 1.0 Universal
 //~ This free software lets you play Zilch dice game in a browser
 
@@ -74,7 +74,7 @@ D6.diceToShow = function(numDice) {
 	D6.numDiceShown = numDice
 }
 
-// Un dado è bloccato a inizio turno o se salvato dopo un precedente tiro
+// Un dado Ã¨ bloccato a inizio turno o se salvato dopo un precedente tiro
 D6.diceIsLocked = function(numDie) {
     if (D6.inizioTurno || dadiSalvati[numDie-1] != undefined) return 1
     return 0
@@ -136,13 +136,13 @@ String.prototype.format = function() {
   return a
 }
 
-// n è il numero di dadi da trovare
+// n Ã¨ il numero di dadi da trovare
 function trovaMultipli(dadi, n) {
     var multipli = [0,0,0]
     var j = 0
     for (i = dadi.length - 1; i >= 0; i--)
         if (dadi[i] >= n)
-            multipli[j++] = i+1 // multiplo più alto
+            multipli[j++] = i+1 // multiplo piÃ¹ alto
     return multipli
 }
 
@@ -162,32 +162,35 @@ function calcolaPuntiDadi(dadi) {
     for (i=0; i<dadi.length; i++)
         dadiPerValore[dadi[i]-1]++
 	// Scala 1-6
-	if (dadiPerValore.indexOf(0)<0)
-		return [3000, 6]
-	// Sestina
-	faccia = trovaMultipli(dadiPerValore, 6)[0]
-	if (faccia)
-		return [faccia==1? 8000:800 * faccia, 6]
-	// Cinquina
-	faccia = trovaMultipli(dadiPerValore, 5)[0]
-	if (faccia) {
-		m = faccia==1? 4000:400
-		pt = puntiUnoCinque(faccia, dadiPerValore)
-		return [faccia*m+pt[0], 5+pt[1]]
-	}
-	// Quaterna
-	faccia = trovaMultipli(dadiPerValore, 4)[0]
-	if (faccia) {
-		coppia = trovaMultipli(dadiPerValore, 2)[1]
-		pt = puntiUnoCinque(faccia, dadiPerValore)
-		if (!coppia) {
-			m = faccia==1? 2000:200
-			return [faccia*m+pt[0], 4+pt[1]]
+	if (Config.scala6)
+		if (dadiPerValore.indexOf(0)<0)
+			return [3000, 6]
+	if (Config.combo456) {
+		// Sestina
+		faccia = trovaMultipli(dadiPerValore, 6)[0]
+		if (faccia)
+			return [faccia==1? 8000:800 * faccia, 6]
+		// Cinquina
+		faccia = trovaMultipli(dadiPerValore, 5)[0]
+		if (faccia) {
+			m = faccia==1? 4000:400
+			pt = puntiUnoCinque(faccia, dadiPerValore)
+			return [faccia*m+pt[0], 5+pt[1]]
 		}
-		if (faccia != 1)
-			return [1500, 6] // 3 coppie > quaterna (2-6)
-		else
-			return [2000+pt[0], 4+pt[1]] // quaterna di 1
+		// Quaterna
+		faccia = trovaMultipli(dadiPerValore, 4)[0]
+		if (faccia) {
+			coppia = trovaMultipli(dadiPerValore, 2)[1]
+			pt = puntiUnoCinque(faccia, dadiPerValore)
+			if (!coppia) {
+				m = faccia==1? 2000:200
+				return [faccia*m+pt[0], 4+pt[1]]
+			}
+			if (faccia != 1)
+				return [1500, 6] // 3 coppie > quaterna (2-6)
+			else
+				return [2000+pt[0], 4+pt[1]] // quaterna di 1
+		}
 	}
 	// Tris
 	Tris = trovaMultipli(dadiPerValore, 3)
@@ -203,9 +206,10 @@ function calcolaPuntiDadi(dadi) {
 		pt = puntiUnoCinque(Tris[0], dadiPerValore)
 		return [Tris[0]*m+pt[0], 3+pt[1]]
 	}
-	// Tripla coppia
-	if (trovaMultipli(dadiPerValore, 2)[2] > 0)
-		return [1500, 6]
+	if (Config.combo3x2)
+		// Tripla coppia
+		if (trovaMultipli(dadiPerValore, 2)[2] > 0)
+			return [1500, 6]
 	// 1 e 5 vanno computati per ultimi, se non inseriti in altre combinazioni
 	// di maggior valore
 	return puntiUnoCinque(0, dadiPerValore)
@@ -215,25 +219,28 @@ function nominaPuntiDadi(dadi) {
     dadiPerValore = [0,0,0,0,0,0]
     for (i=0; i<dadi.length; i++)
         dadiPerValore[dadi[i]-1]++
-	if (dadiPerValore.indexOf(0)<0)
-		return "Scala di 6"
-	faccia = trovaMultipli(dadiPerValore, 6)[0]
-	if (faccia) return "Sestina di "+faccia
-	faccia = trovaMultipli(dadiPerValore, 5)[0]
-	if (faccia) 	return "Cinquina di "+faccia
-	faccia = trovaMultipli(dadiPerValore, 4)[0]
-	if (faccia) {
-		coppia = trovaMultipli(dadiPerValore, 2)[1]
-		pt = puntiUnoCinque(faccia, dadiPerValore)
-		if (!coppia) {
-			s = "Quaterna di "+faccia
-			if (pt[0]) s += " con 1 o 5"
-			return s
+	if (Config.scala6)
+		if (dadiPerValore.indexOf(0)<0)
+			return "Scala di 6"
+	if (Config.combo456) {
+		faccia = trovaMultipli(dadiPerValore, 6)[0]
+		if (faccia) return "Sestina di "+faccia
+		faccia = trovaMultipli(dadiPerValore, 5)[0]
+		if (faccia) 	return "Cinquina di "+faccia
+		faccia = trovaMultipli(dadiPerValore, 4)[0]
+		if (faccia) {
+			coppia = trovaMultipli(dadiPerValore, 2)[1]
+			pt = puntiUnoCinque(faccia, dadiPerValore)
+			if (!coppia) {
+				s = "Quaterna di "+faccia
+				if (pt[0]) s += " con 1 o 5"
+				return s
+			}
+			if (faccia != 1)
+				return "Tripla coppia"
+			else
+				return "Quaterna di 1"
 		}
-		if (faccia != 1)
-			return "Tripla coppia"
-		else
-			return "Quaterna di 1"
 	}
 	Tris = trovaMultipli(dadiPerValore, 3)
 	if (Tris[1]>0)
@@ -244,16 +251,16 @@ function nominaPuntiDadi(dadi) {
 		if (pt[0]) s+=" con 1 o 5"
 		return s
 	}
-	if (trovaMultipli(dadiPerValore, 2)[2] > 0)
-		return "Tripla coppia"
+	if (Config.combo3x2)
+		if (trovaMultipli(dadiPerValore, 2)[2] > 0)
+			return "Tripla coppia"
 	if (puntiUnoCinque(0, dadiPerValore)[0])
 		return "1 o 5"
 	return "Zilch"
 }
 
-
 D6.creaDadi = function(callback, callbackData) {
-	buttonLabel = "Lancia!"
+	buttonLabel = "Tira!"
 	D6.numDice = 6
 	D6.numDiceShown = 6
 	results = []
@@ -273,8 +280,8 @@ D6.creaDadi = function(callback, callbackData) {
 	}
 	genHtml = "<div id='diceall' align='center'>" + builder.genDiceHtml(layout, D6.middleManCallback, middleManData) + builder.genSDiceHtml(layout)
 	if (buttonLabel != "none") {
-		genHtml += "<div id='diceform'><form><input style='width:60px' type='button' id='dicebutton' value='" + buttonLabel +
-    "' onclick='tiraDadi()'/><input style='width:60px' type='button' onclick='salvaPunti()' align='right' value='Salva'/><input style='width:60px' type='button' onclick='resetGioco()' align='right' value='Azzera'/></form></div>"
+		genHtml += "<div id='diceform'><form><input style='width:80px;height:40px' type='button' id='dicebutton' value='" + buttonLabel +
+    "' onclick='tiraDadi()'/><br><input style='width:80px;height:40px' type='button' onclick='salvaPunti()' value='Salva'/><br><input style='width:80px;height:40px' type='button' onclick='resetGioco()' value='Azzera'/></form></div>"
 	}
 	genHtml += "</div>"
 	D6.genHtml = genHtml
@@ -285,6 +292,16 @@ D6.creaDadi = function(callback, callbackData) {
 function tiraDadi() {
 	// Resetta dopo uno Zilch
 	if (wasZilch) {
+		// Permette eventualmente il secondo tiro del sesto dado
+		if (Config.doppio15 && doppio15++ < 1 && D6.numDiceShown==1) {
+			wasZilch = false
+			dice = D6AnimBuilder.get("dice")
+			dice.reset()
+			dice.start()
+			D6.inizioTurno = false
+			tiriTotali++
+			return
+		}
 		resetTurno()
 		D6.diceSaved.length = D6.diceSavedLast
 	}
@@ -337,7 +354,7 @@ function salvaPunti() {
 
 // Aggiorna le informazioni dopo il tiro
 var callback = function (total, info, results) {
-	sogliaPunti = 300
+	sogliaPunti = Config.soglia300? 300:50
     dadi = D6.diceGet()
 	punti = calcolaPuntiDadi(dadi)
 	puntiTiro = punti[0]
@@ -347,20 +364,21 @@ var callback = function (total, info, results) {
 		totZilch++
 		sequenzaZilch++
         document.getElementById("infodiv2").innerHTML = "<b>Z I L C H !</b>"
-		if (D6.inizioTurno) {
+		if (D6.inizioTurno && Config.zilch1) {
 			document.getElementById("infodiv1").innerHTML = "Zilch di turno, guadagni 500 punti!"
 			puntiSalvati+=500
 		}
-		if (sequenzaZilch==3) {
+		if (sequenzaZilch==3 && Config.zilch3) {
 			document.getElementById("infodiv1").innerHTML = "Terzo Zilch consecutivo, perdi 500 punti!"
 			puntiSalvati-=500
 			seqZilch=0
 		}
-        return
+		if (Config.doppio15 && !doppio15 && D6.numDiceShown==1)
+			document.getElementById("infodiv3").innerHTML = "Hai fatto Zilch, ma puoi tirare il sesto dado ancora una volta!"
 	}
 	D6.numDiceShownLast = D6.numDiceShown
 	s = "Dadi per {0} punti, {1} da parte. ".format(puntiTiro, puntiMano)
-	if (puntiMano+puntiTiro >= 300) {
+	if (puntiMano+puntiTiro >= sogliaPunti) {
 		s += "Puoi salvare {0} punti. ".format(puntiMano+puntiTiro)
 		puntoDaAnnotare = true
 		// Tiro libero, se accantoniamo tutti i dadi utili (risultati validi per il punteggio)
@@ -368,16 +386,25 @@ var callback = function (total, info, results) {
 			s+="Puoi rilanciare i dadi, se li salvi tutti."
 	}
 	else
-		s += "Salva almeno un dado e accumula {0} punti o più per registrarli.".format(sogliaPunti)
+		s += "Salva almeno un dado e accumula {0} punti o piÃ¹ per registrarli.".format(sogliaPunti)
 	document.getElementById("infodiv1").innerHTML = "Hai salvato {0} punti tirando {1} volte con {2} Zilch.".format(puntiSalvati, tiriTotali, totZilch)
-	document.getElementById("infodiv2").innerHTML = s
+	if (puntiTiro)
+		document.getElementById("infodiv2").innerHTML = s
     infoDiv()
 }
 
-var puntiSalvati, puntiMano, puntiTiro, wasZilch, totZilch, sequenzaZilch
+var puntiSalvati, puntiMano, puntiTiro, wasZilch, totZilch, sequenzaZilch, doppio15
 var dadiSalvati, tiriTotali, turniRimasti, puntoDaAnnotare
+var Config
 
 function resetGioco() {
+	// Ritrova o crea la configurazione
+	if (Config == undefined) {
+		Config = getCookie('Config')
+		if (Config==undefined) {
+			Config = {'soglia300':true, 'usaZilch1':true, 'usaZilch3':true, 'combo3x2':true, 'combo456':true, 'scala6':true, 'doppio15':false}
+		}
+	}
 	D6.diceSaved = [] // dadi salvati in tutta la partita (array di array)
 	D6.diceSavedLast = D6.diceSaved.length
 	tiriTotali = 0
@@ -399,6 +426,7 @@ function resetTurno() {
     puntiMano = 0
     dadiSalvati = []
     puntoDaAnnotare = false
+	doppio15=0
     for (i=1; i<D6.numDice+1; i++)
         document.getElementById('sdice'+i).src="blank.gif"
 }
@@ -409,13 +437,14 @@ function infoDiv() {
 
 function hallOfFame() {
     document.write('<html><body>')
-    // javascript:history.back() non vale, poiché siamo tecnicamente nella stessa pagina... riscritta!
+    // javascript:history.back() non vale, poichÃ© siamo tecnicamente nella stessa pagina... riscritta!
     document.write('<div style="text-align:center"><a href="index.html">(Torna al gioco)</a></div>')
-    document.write('<h2>Ultimi 100 punteggi</h2>')
-    document.write('<table>')
-    var punteggi = getScore()
-    for (var k in punteggi) {
-        document.write('<tr><td>'+k+'</td><td style=""></td><td>'+punteggi[k]+'</td></tr>')
+    document.write('<h2>Migliori punteggi</h2>')
+    document.write('<table style="width:40%">')
+	document.write('<tr style="align:left"><th>Data</th><th>Punti</th><th>Tiri</th><th>Zilch</th></tr>')
+    var p = getScore()
+    for (var k in p) {
+		document.write('<tr style="align:left"><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td></tr>'.format(k, p[k][0],p[k][1],p[k][2]))
     }
     document.write('</table>')
     document.write('</body></html>')
@@ -423,33 +452,23 @@ function hallOfFame() {
 
 // Recupera i punteggi annotati nel cookie
 function getScore() {
-    cookie = document.cookie.split(';')
-    var myCookie="", label='punteggi='
-    punteggi = {}
-
-    for(i=0; i<cookie.length; i++)
-    {
-        var t = cookie[i].trim()
-        if (t.indexOf(label)==0)
-            myCookie = t.substring(label.length, t.length)
-    }
-
-    if (myCookie)
-        punteggi = JSON.parse(myCookie)
-
-    return punteggi
+	cookie = getCookie('Punti')
+    if (cookie) {
+		// Ordina i punteggi in base al punteggio medio per tiro
+		Object.keys(cookie).sort((a, b) => cookie[b][0]/cookie[b][1] - cookie[a][0]/cookie[a][1])
+		return cookie
+	}
 }
 
 // Salva cronologicamente gli ultimi 100 punteggi
-function storeScore(score) {
-    var punteggi = getScore()
-    if (Object.keys(punteggi).length == 100) {
-        delete punteggi[Object.keys(punteggi)[0]]
+function storeScore() {
+    punti = getScore()
+    if (! punti) punti = {}
+    if (Object.keys(punti).length == 100) {
+        delete punti[Object.keys(punti)[0]]
     }
-    if (! punteggi)
-        punteggi = {}
-    punteggi[new Date().toLocaleString()] = score
-    setCookie('punteggi', JSON.stringify(punteggi), 365)
+    punti[new Date().toLocaleString()] = [puntiSalvati, tiriTotali, totZilch]
+    setCookie('Punti', JSON.stringify(punti), 3650)
 }
 
 function setCookie(cname, cvalue, exdays) {
@@ -457,4 +476,53 @@ function setCookie(cname, cvalue, exdays) {
   d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000))
   var expires = "expires="+d.toUTCString();
   document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
+}
+
+function getCookie(cname) {
+    cookie = document.cookie.split(';')
+    var myCookie="", label=cname+'='
+    for(i=0; i<cookie.length; i++) {
+        t = cookie[i].trim()
+        if (t.indexOf(label)==0)
+            myCookie = t.substring(label.length, t.length)
+    }
+    if (myCookie)
+        return JSON.parse(myCookie)
+
+    return
+}
+
+function settings() {
+    document.write('<html><body>')
+    // javascript:history.back() non vale, poichÃ© siamo tecnicamente nella stessa pagina... riscritta!
+    document.write('<div style="text-align:center"><a href="index.html">(Torna al gioco)</a></div>')
+    document.write('<h2>Impostazioni</h2>')
+    document.write('<h4>Configura la variante di Zilch che vuoi giocare, indicando quali regole adottare.</h4>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="soglia300" checked>Soglia di 300 punti a turno per registrare</input><br>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="usaZilch1" checked>Bonus di 500 punti per Zilch a inizio turno</input><br>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="usaZilch3" checked>Malus di 500 punti per tre Zilch consecutivi</input><br>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="combo456" checked>Combinazione 4-5-6 di un tipo</input><br>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="combo3x2" checked>Combinazione tripla coppia</input><br>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="scala6" checked>Combinazione scala di 6 dadi</input><br>')
+    document.write('<input onchange="update_settings()" type="checkbox" id="doppio15">Nuovo tiro del sesto dado dopo Zilch</input><br>')
+    document.write('</body></html>')
+	document.getElementById("soglia300").checked = Config.soglia300
+	document.getElementById("usaZilch1").checked = Config.usaZilch1
+	document.getElementById("usaZilch3").checked = Config.usaZilch3
+	document.getElementById("combo456").checked = Config.combo456
+	document.getElementById("combo3x2").checked = Config.combo3x2
+	document.getElementById("scala6").checked = Config.scala6
+	document.getElementById("doppio15").checked = Config.doppio15
+}
+
+// Aggiorna la configurazione secondo la selezione e la salva in Cookie
+function update_settings() {
+	Config.soglia300 = document.getElementById("soglia300").checked
+	Config.usaZilch1 = document.getElementById("usaZilch1").checked
+	Config.usaZilch3 = document.getElementById("usaZilch3").checked
+	Config.combo456 = document.getElementById("combo456").checked
+	Config.combo3x2 = document.getElementById("combo3x2").checked
+	Config.scala6 = document.getElementById("scala6").checked
+	Config.doppio15 = document.getElementById("doppio15").checked
+	setCookie("Config", JSON.stringify(Config), 365)
 }
