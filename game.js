@@ -399,11 +399,10 @@ var Config
 
 function resetGioco() {
 	// Ritrova o crea la configurazione
+	Config = getCookie('Config')
 	if (Config == undefined) {
-		Config = getCookie('Config')
-		if (Config==undefined) {
-			Config = {'soglia300':true, 'usaZilch1':true, 'usaZilch3':true, 'combo3x2':true, 'combo456':true, 'scala6':true, 'doppio15':false}
-		}
+		Config = {'soglia300':true, 'usaZilch1':true, 'usaZilch3':true, 'combo3x2':true, 'combo456':true, 'scala6':true, 'doppio15':false}
+		setCookie("Config", JSON.stringify(Config), 365)
 	}
 	D6.diceSaved = [] // dadi salvati in tutta la partita (array di array)
 	D6.diceSavedLast = D6.diceSaved.length
@@ -493,30 +492,27 @@ function getCookie(cname) {
 }
 
 function settings() {
-    document.write('<html><body>')
-    // javascript:history.back() non vale, poiché siamo tecnicamente nella stessa pagina... riscritta!
-    document.write('<div style="text-align:center"><a href="index.html">(Torna al gioco)</a></div>')
-    document.write('<h2>Impostazioni</h2>')
-    document.write('<h4>Configura la variante di Zilch che vuoi giocare, indicando quali regole adottare.</h4>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="soglia300" checked>Soglia di 300 punti a turno per registrare</input><br>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="usaZilch1" checked>Bonus di 500 punti per Zilch a inizio turno</input><br>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="usaZilch3" checked>Malus di 500 punti per tre Zilch consecutivi</input><br>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="combo456" checked>Combinazione 4-5-6 di un tipo</input><br>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="combo3x2" checked>Combinazione tripla coppia</input><br>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="scala6" checked>Combinazione scala di 6 dadi</input><br>')
-    document.write('<input onchange="update_settings()" type="checkbox" id="doppio15">Nuovo tiro del sesto dado dopo Zilch</input><br>')
-    document.write('</body></html>')
-	document.getElementById("soglia300").checked = Config.soglia300
-	document.getElementById("usaZilch1").checked = Config.usaZilch1
-	document.getElementById("usaZilch3").checked = Config.usaZilch3
-	document.getElementById("combo456").checked = Config.combo456
-	document.getElementById("combo3x2").checked = Config.combo3x2
-	document.getElementById("scala6").checked = Config.scala6
-	document.getElementById("doppio15").checked = Config.doppio15
+	page = '<!DOCTYPE html><html><body>'
+    page+='<div style="text-align:center"><a href="index.html">(Torna al gioco)</a></div>'
+    page+='<h2>Impostazioni</h2>'
+    page+='<h4>Configura la variante di Zilch che vuoi giocare, indicando quali regole adottare.</h4>'
+    page+='<input onchange="update_settings()" type="checkbox" id="soglia300" {0}>Soglia di 300 punti a turno per registrare</input><br>'.format(Config.soglia300? 'checked':'')
+    page+='<input onchange="update_settings()" type="checkbox" id="usaZilch1" {0}>Bonus di 500 punti per Zilch a inizio turno</input><br>'.format(Config.usaZilch1? 'checked':'')
+    page+='<input onchange="update_settings()" type="checkbox" id="usaZilch3" {0}>Malus di 500 punti per tre Zilch consecutivi</input><br>'.format(Config.usaZilch3? 'checked':'')
+    page+='<input onchange="update_settings()" type="checkbox" id="combo456" {0}>Combinazione 4-5-6 di un tipo</input><br>'.format(Config.combo456? 'checked':'')
+    page+='<input onchange="update_settings()" type="checkbox" id="combo3x2" {0}>Combinazione tripla coppia</input><br>'.format(Config.combo3x2? 'checked':'')
+    page+='<input onchange="update_settings()" type="checkbox" id="scala6" {0}>Combinazione scala di 6 dadi</input><br>'.format(Config.scala6? 'checked':'')
+    page+='<input onchange="update_settings()" type="checkbox" id="doppio15" {0}>Nuovo tiro del sesto dado dopo Zilch</input><br>'.format(Config.doppio15? 'checked':'')
+	page+='<script type="text/javascript" src="d6.js"></script>'
+	page+='<script type="text/javascript" src="game.js"></script>'
+    page+='</body></html>'
+	document.write(page)
+	document.close()
 }
 
 // Aggiorna la configurazione secondo la selezione e la salva in Cookie
 function update_settings() {
+	Config = getCookie('Config')
 	Config.soglia300 = document.getElementById("soglia300").checked
 	Config.usaZilch1 = document.getElementById("usaZilch1").checked
 	Config.usaZilch3 = document.getElementById("usaZilch3").checked
